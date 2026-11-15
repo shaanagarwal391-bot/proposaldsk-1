@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block title %}{{ 'Edit' if client else 'Add' }} client · ProposalDesk{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">CLIENT DETAILS</span><h1>{{ 'Edit client' if client else 'Add a client' }}</h1><p>Store the contact information you need for proposals.</p></div></div>
+<form class="panel form-panel" method="post"><div class="form-grid">
+<label>Client name *<input required name="name" value="{{ client.name if client else '' }}" placeholder="e.g. Aisha Sharma"></label>
+<label>Company<input name="company" value="{{ client.company if client else '' }}" placeholder="Company or organization"></label>
+<label>Email<input type="email" name="email" value="{{ client.email if client else '' }}" placeholder="name@example.com"></label>
+<label>Phone<input name="phone" value="{{ client.phone if client else '' }}" placeholder="+91…"></label>
+<label class="full">Address<textarea name="address" rows="2">{{ client.address if client else '' }}</textarea></label>
+<label class="full">Notes<textarea name="notes" rows="3" placeholder="Anything useful to remember…">{{ client.notes if client else '' }}</textarea></label>
+</div><div class="form-actions"><a class="btn" href="{{ url_for('clients') }}">Cancel</a><button class="btn primary">Save client</button></div></form>
+{% endblock %}

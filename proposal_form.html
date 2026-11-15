@@ -1,0 +1,43 @@
+{% extends "base.html" %}{% block title %}{{ 'Edit' if proposal else 'New' }} proposal · ProposalDesk{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">PROPOSAL BUILDER</span><h1>{{ 'Edit proposal' if proposal else 'Create a proposal' }}</h1><p>Set the scope, investment and terms for your client.</p></div></div>
+{% if not clients %}<div class="panel empty-state"><h3>Add a client first</h3><p>You need a client record before creating a proposal.</p><a class="btn primary" href="{{ url_for('client_form') }}">＋ Add client</a></div>
+{% else %}
+<form class="panel form-panel" method="post"><div class="form-grid">
+<label class="full">Client *<select required name="client_id"><option value="">Choose a client</option>{% for c in clients %}<option value="{{ c.id }}" {% if proposal and proposal.client_id==c.id %}selected{% endif %}>{{ c.name }}{% if c.company %} — {{ c.company }}{% endif %}</option>{% endfor %}</select></label>
+<label class="full">Proposal title *<input required name="title" value="{{ proposal.title if proposal else '' }}" placeholder="e.g. Website redesign proposal"></label>
+<label class="full">Overview / description<textarea name="description" rows="4" placeholder="Describe the client's needs and your approach…">{{ proposal.description if proposal else '' }}</textarea></label>
+<label class="full">Services and deliverables<textarea name="services" rows="5" placeholder="List each service or deliverable on a new line…">{{ proposal.services if proposal else '' }}</textarea></label>
+<div class="full service-fees-section">
+  <div class="service-fees-heading service-fees-toolbar">
+    <div><h3>Individual service fees</h3><p>Choose a saved service or type a new name. Add as many line items as this proposal needs. Manage reusable services from the Services menu.</p></div>
+    <a class="btn" href="{{ url_for('service_catalog') }}" target="_blank">Manage services</a>
+  </div>
+  <datalist id="service-catalog-options">
+    {% for item in catalog_services %}<option value="{{ item.name }}" data-amount="{{ item.amount }}" data-scope="{{ item.scope|e }}"></option>{% endfor %}
+  </datalist>
+  <div class="service-fee-list" id="service-fee-list">
+    {% for item in service_items %}
+    <div class="service-fee-row">
+      <label>Service name<input type="text" name="service_name[]" list="service-catalog-options" value="{{ item.name }}" placeholder="Choose or type a service" required></label>
+      <label>Fee<input class="service-fee-input" type="number" min="0" step="0.01" name="service_amount[]" value="{{ '%.2f'|format(item.amount) }}" required></label>
+      <label class="service-scope-field">Scope of services<textarea name="service_scope[]" rows="3" placeholder="Describe the work included" required>{{ item.scope or '' }}</textarea></label>
+      <button class="btn remove-service-row" type="button" aria-label="Remove service">Remove</button>
+    </div>
+    {% endfor %}
+  </div>
+  <button class="btn add-service-row" id="add-service-row" type="button">＋ Add another service</button>
+  <div class="service-fee-summary">
+    <div><span>Professional fee subtotal</span><strong id="service-subtotal">₹0.00</strong></div>
+    <div><span>IGST (18%)</span><strong id="service-igst">₹0.00</strong></div>
+    <div class="grand-total"><span>Total including IGST</span><strong id="service-grand-total">₹0.00</strong></div>
+  </div>
+  <input type="hidden" name="amount" id="proposal-amount" value="{{ proposal.amount if proposal else '0' }}">
+</div>
+<label>Currency<select name="currency"><option value="INR" {% if not proposal or proposal.currency=='INR' %}selected{% endif %}>INR (₹)</option><option value="USD" {% if proposal and proposal.currency=='USD' %}selected{% endif %}>USD ($)</option><option value="EUR" {% if proposal and proposal.currency=='EUR' %}selected{% endif %}>EUR (€)</option><option value="GBP" {% if proposal and proposal.currency=='GBP' %}selected{% endif %}>GBP (£)</option></select></label>
+<label>Status<select name="status">{% for s in ['Draft','Sent','Accepted','Rejected'] %}<option {% if proposal and proposal.status==s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></label>
+<label>Valid until<input type="date" name="valid_until" value="{{ proposal.valid_until if proposal else default_valid_until }}"><small>Defaults to two years from today. You can change it if required.</small></label>
+<label class="full">Terms & conditions<textarea name="terms" rows="5" placeholder="Additional terms, payment schedule, revisions, timelines…">{{ proposal.terms if proposal else default_terms }}</textarea><small>Default clause: proposal valid for two years; fees may increase if client turnover/business volume increases. You can edit this wording for each proposal.</small></label>
+</div><div class="form-actions"><a class="btn" href="{{ url_for('dashboard') }}">Cancel</a><button class="btn primary">Save proposal</button></div></form>
+{% endif %}
+{% endblock %}

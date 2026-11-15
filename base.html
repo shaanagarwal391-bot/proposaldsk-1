@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ProposalDesk{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="{{ url_for('dashboard') }}"><span class="brand-icon">P</span><span>ProposalDesk<small>CLIENT WORKSPACE</small></span></a>
+    <nav><a href="{{ url_for('dashboard') }}">▦ <span>Dashboard</span></a><a href="{{ url_for('clients') }}">♙ <span>Clients</span></a><a href="{{ url_for('proposal_form') }}">＋ <span>New proposal</span></a><a href="{{ url_for('service_catalog') }}">☷ <span>Services & fees</span></a></nav>
+    <div class="side-note"><b>Stay organized.</b><p>Keep every client and proposal in one place.</p></div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div><span class="eyebrow">WORKSPACE</span><b>Client proposals</b></div><a class="btn primary" href="{{ url_for('proposal_form') }}">＋ New proposal</a></header>
+    <section class="content">
+      {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}{% for category,message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}{% endif %}{% endwith %}
+      {% block content %}{% endblock %}
+    </section>
+    <footer>ProposalDesk · Your client workspace</footer>
+  </main>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body></html>

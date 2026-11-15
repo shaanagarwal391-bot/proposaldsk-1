@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block title %}Services & fees · ProposalDesk{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">REUSABLE PRICE LIST</span><h1>Services & fees</h1><p>Add your regular services once and reuse them in future proposals.</p></div><a class="btn" href="{{ url_for('proposal_form') }}">＋ Create proposal</a></div>
+<section class="panel">
+  <h3 style="margin-top:0">Add a new service</h3>
+  <form method="post" class="catalog-form">
+    <label>Service name *<input name="name" maxlength="160" placeholder="e.g. GST registration" required></label>
+    <label>Default fee (₹) *<input name="amount" type="number" min="0" step="0.01" placeholder="0.00" required></label>
+    <label class="catalog-scope">Scope of services<textarea name="scope" rows="3" maxlength="5000" placeholder="Describe exactly what is included in this service..." required></textarea></label>
+    <button class="btn primary" type="submit">Add service</button>
+  </form>
+</section>
+<section class="panel catalog-list">
+  <div class="section-head"><div><h2>Saved services</h2><p>{{ services|length }} reusable service(s)</p></div></div>
+  <div class="table-wrap"><table><thead><tr><th>Service name</th><th>Scope of services</th><th>Default fee</th><th>Action</th></tr></thead><tbody>
+  {% for item in services %}<tr><td><strong>{{ item.name }}</strong></td><td class="scope-cell">{{ item.scope or "No scope added yet" }}</td><td>₹ {{ "{:,.2f}".format(item.amount) }}</td><td class="catalog-actions"><form method="post" action="{{ url_for('service_catalog_delete',sid=item.id) }}" onsubmit="return confirm('Remove this service from the reusable list? Existing proposals will not change.')"><button class="link danger" type="submit">Remove</button></form></td></tr>
+  {% else %}<tr><td colspan="4" class="empty">No saved services yet. Add your first service above.</td></tr>{% endfor %}
+  </tbody></table></div>
+  <p class="muted">Removing a service only removes it from the reusable list. It does not change services already saved in existing proposals.</p>
+</section>
+{% endblock %}

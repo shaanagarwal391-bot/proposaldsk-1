@@ -1,0 +1,42 @@
+{% extends "base.html" %}{% block title %}{{ proposal.title }} · ProposalDesk{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">PROPOSAL #{{ proposal.id }}</span><h1>{{ proposal.title }}</h1><p>Prepared for {{ proposal.client_name }}{% if proposal.company %} · {{ proposal.company }}{% endif %}</p></div><div class="heading-actions"><a class="btn" href="{{ url_for('proposal_pdf',pid=proposal.id) }}">↓ Download PDF</a><a class="btn primary" href="{{ url_for('proposal_form',pid=proposal.id) }}">Edit proposal</a></div></div>
+<div class="detail-grid"><section class="panel"><div class="detail-top"><div><span class="eyebrow">PROFESSIONAL FEE SUBTOTAL</span><h2>{{ proposal.currency }} {{ "{:,.2f}".format(proposal.amount) }}</h2><small class="muted">IGST (18%): {{ proposal.currency }} {{ "{:,.2f}".format(proposal.amount * 0.18) }} · Total: {{ proposal.currency }} {{ "{:,.2f}".format(proposal.amount * 1.18) }}</small></div><span class="status {{ proposal.status|lower }}">{{ proposal.status }}</span></div>
+<h3>Overview</h3><p class="preline">{{ proposal.description or 'No overview added.' }}</p><h3>Services & deliverables</h3><p class="preline">{{ proposal.services or 'No services listed.' }}</p>
+<h3>Service-wise scope and fees</h3>
+<div class="proposal-service-scopes">
+{% for item in service_items %}
+  <article class="proposal-service-scope"><div class="proposal-service-title"><strong>{{ item.name }}</strong><strong>{{ proposal.currency }} {{ "{:,.2f}".format(item.amount) }}</strong></div>
+  <div class="proposal-service-description">{{ item.scope or 'Scope of services not specified.' }}</div></article>
+{% endfor %}
+</div>
+<section class="individual-payment-box">
+  <h3>Individual service payment</h3>
+  <p class="muted">Choose one service to view its separate fee and tax calculation.</p>
+  <label for="individual-service-select">Select service</label>
+  <select id="individual-service-select" data-currency="{{ proposal.currency }}">
+    {% for item in service_items %}
+    <option value="{{ loop.index0 }}" data-fee="{{ item.amount }}">{{ item.name }}</option>
+    {% endfor %}
+  </select>
+  <div class="individual-payment-summary">
+    <div><span>Selected service fee</span><strong id="individual-fee">{{ proposal.currency }} {{ "{:,.2f}".format(service_items[0].amount if service_items else 0) }}</strong></div>
+    <div><span>IGST (18%)</span><strong id="individual-igst">{{ proposal.currency }} {{ "{:,.2f}".format((service_items[0].amount if service_items else 0) * 0.18) }}</strong></div>
+    <div class="grand-total"><span>Amount for this service</span><strong id="individual-total">{{ proposal.currency }} {{ "{:,.2f}".format((service_items[0].amount if service_items else 0) * 1.18) }}</strong></div>
+  </div>
+  <p class="payment-note">Payment gateway is not connected yet. This section currently calculates the individual amount; connect Razorpay/UPI or your preferred gateway to collect payments.</p>
+</section>
+{% if proposal.valid_until %}<h3>Valid until</h3><p>{{ proposal.valid_until }}</p>{% endif %}{% if proposal.terms %}<h3>Terms & conditions</h3><p class="preline">{{ proposal.terms }}</p>{% endif %}
+<section class="acceptance-block">
+  <p>Please sign and return a copy to confirm acceptance.</p>
+  <p>For A Neha &amp; Associates Chartered Accountants</p>
+  <p class="signature-line">________________ Proprietor · Membership No. [ ]</p>
+  <p><strong>Accepted by:</strong> {{ proposal.company or proposal.client_name }}</p>
+  <p class="signature-line">________________ Director · Date: [ ]</p>
+</section>
+<div class="meta">Created {{ proposal.created_at }} · Updated {{ proposal.updated_at }}</div></section>
+<aside class="panel"><span class="eyebrow">CLIENT</span><h3>{{ proposal.client_name }}</h3><p>{{ proposal.company or '' }}</p><p>{{ proposal.client_email or 'No email provided' }}</p><div class="rule"></div><h3>Attachments</h3><form class="upload" method="post" enctype="multipart/form-data" action="{{ url_for('upload',pid=proposal.id) }}"><input type="file" name="file" required><small>PDF, images, Office docs or text · max 16 MB</small><button class="btn">Upload file</button></form>
+{% for f in files %}<div class="file-row"><a href="{{ url_for('download_upload',filename=f.stored_name) }}">↳ {{ f.original_name }}</a><form method="post" action="{{ url_for('attachment_delete',aid=f.id) }}"><button class="link danger">×</button></form></div>{% else %}<p class="muted">No attachments yet.</p>{% endfor %}
+</aside></div>
+<div class="danger-zone"><form method="post" action="{{ url_for('proposal_duplicate',pid=proposal.id) }}"><button class="btn">Duplicate proposal</button></form><form method="post" action="{{ url_for('proposal_delete',pid=proposal.id) }}" onsubmit="return confirm('Permanently delete this proposal?')"><button class="btn danger-outline">Delete proposal</button></form></div>
+{% endblock %}
